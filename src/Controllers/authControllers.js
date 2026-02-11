@@ -4,10 +4,9 @@ import jwt from "jsonwebtoken";
 
 
 export const signup = async (req, res) => {
-    const { name, email, password } = req.body; // Added '='
+    const { name, email, password } = req.body;
 
     try {
-        // 1. Check if user exists
         const existingUser = await prisma.user.findUnique({
             where: { email }
         });
@@ -16,15 +15,12 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        // 2. Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Create the user
         await prisma.user.create({
             data: { name, email, password: hashedPassword }
         });
 
-        // 4. Send success response
         return res.status(201).json({ message: "Account Created" });
 
     } catch (err) {
@@ -46,14 +42,12 @@ export const login = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Use bcrypt correctly
         const isMatch = await bcrypt.compare(password, existingUser.password);
         if (!isMatch) {
             console.error("Login error: Invalid credentials for email:", email);
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        // Ensure JWT_SECRET matches your .env file exactly (usually uppercase)
         if (!process.env.JWT_SECRET) {
             console.error("Login error: JWT_SECRET is not defined in environment variables.");
             return res.status(500).json({ message: "Server misconfiguration: JWT_SECRET missing" });

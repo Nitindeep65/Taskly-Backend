@@ -1,6 +1,6 @@
 import express from "express";
 import { getTodos, createTodo, deleteTodo , updateTodo } from "../Controllers/todoControllers.js";
-import authMiddleware from "../middleware/authMiddleware.js"; // Import the middleware
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

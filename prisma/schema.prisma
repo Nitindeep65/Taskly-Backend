@@ -6,26 +6,74 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   name     String
-  email    String  @unique
+  email    String    @unique
   password String
   todos    Todo[]
+  projects Project[]
+  tags     Tag[]
 }
+
 enum TodoStatus {
   URGENT
   ONGOING
   COMPLETED
 }
-model Todo {
-  id        Int      @id @default(autoincrement())
-  name      String
-  title     String
-  status    TodoStatus @default(ONGOING)
+
+enum TagType {
+  PREDEFINED
+  CUSTOM
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
   description String?
-  completed Boolean  @default(false)
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  color       String?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  todos       Todo[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String
+  color     String?
+  type      TagType   @default(CUSTOM)
+  userId    Int?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  todos     TodoTag[]
+  createdAt DateTime  @default(now())
+  
+  @@unique([name, userId])
+}
+
+model Todo {
+  id          Int        @id @default(autoincrement())
+  name        String
+  title       String
+  status      TodoStatus @default(ONGOING)
+  description String?
+  completed   Boolean    @default(false)
+  projectId   Int?
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags        TodoTag[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+}
+
+model TodoTag {
+  todoId Int
+  todo   Todo @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  tagId  Int
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([todoId, tagId])
 }
