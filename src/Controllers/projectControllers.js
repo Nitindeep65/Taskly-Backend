@@ -1,8 +1,9 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import prisma from "../config/prisma.js";
 
 export const getProjects = async (req, res) => {
   try {
+    console.log("Getting projects for userId:", req.userId);
+    
     const projects = await prisma.project.findMany({
       where: { userId: parseInt(req.userId) },
       include: {
@@ -14,10 +15,19 @@ export const getProjects = async (req, res) => {
       take: 5
     });
     
+    console.log("Found projects:", projects.length);
     res.json(projects);
   } catch (error) {
     console.error("Get projects error:", error);
-    res.status(500).json({ error: "Failed to fetch projects" });
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      userId: req.userId
+    });
+    res.status(500).json({ 
+      error: "Failed to fetch projects",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
