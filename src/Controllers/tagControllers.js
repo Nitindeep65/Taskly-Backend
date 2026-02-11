@@ -1,4 +1,5 @@
-import prisma from "../config/prisma.js";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 export const getTags = async (req, res) => {
   try {
