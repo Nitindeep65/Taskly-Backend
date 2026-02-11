@@ -1,9 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
+
+// Ensure connection
+prisma.$connect().catch(err => {
+  console.error('Prisma connection error in projectControllers:', err);
+});
 
 export const getProjects = async (req, res) => {
   try {
     console.log("Getting projects for userId:", req.userId);
+    console.log("Prisma client available:", !!prisma);
+    console.log("Prisma project model:", !!prisma?.project);
+    
+    if (!prisma) {
+      throw new Error("Prisma client not initialized");
+    }
     
     const projects = await prisma.project.findMany({
       where: { userId: parseInt(req.userId) },
@@ -83,6 +97,9 @@ export const getProjectById = async (req, res) => {
 
 export const createProject = async (req, res) => {
   try {
+    console.log("Creating project for userId:", req.userId);
+    console.log("Prisma client available:", !!prisma);
+    
     const { name, description, color } = req.body;
     
     if (!name?.trim()) {
@@ -99,6 +116,10 @@ export const createProject = async (req, res) => {
     
     if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
       return res.status(400).json({ error: "Invalid color format. Use hex color (e.g., #FF5733)" });
+    }
+    
+    if (!prisma) {
+      throw new Error("Prisma client not initialized");
     }
     
     const project = await prisma.project.create({

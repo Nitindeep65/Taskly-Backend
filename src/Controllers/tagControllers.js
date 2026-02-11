@@ -1,5 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
+
+// Ensure connection
+prisma.$connect().catch(err => {
+  console.error('Prisma connection error in tagControllers:', err);
+});
 
 export const getTags = async (req, res) => {
   try {

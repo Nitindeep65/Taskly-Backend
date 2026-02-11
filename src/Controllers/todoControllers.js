@@ -1,5 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
+
+// Ensure connection
+prisma.$connect().catch(err => {
+  console.error('Prisma connection error in todoControllers:', err);
+});
 
 
 export const getTodos = async (req, res) => {

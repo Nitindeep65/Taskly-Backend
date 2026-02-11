@@ -45,10 +45,22 @@ app.listen(PORT, async () => {
     console.log('📊 Routes mounted: /auth, /todo, /project, /tag, /ai');
     console.log('🏥 Health check available at /health');
     
+    // Check environment variables
+    console.log('🔍 Environment check:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV || 'not set');
+    console.log('- DATABASE_URL:', process.env.DATABASE_URL ? 'set' : 'not set');
+    console.log('- JWT_SECRET:', process.env.JWT_SECRET ? 'set' : 'not set');
+    console.log('- PERPLEXITY_API_KEY:', process.env.PERPLEXITY_API_KEY ? 'set' : 'not set');
+    
     try {
       await prisma.$connect();
       console.log('✅ Database connected successfully');
+      
+      // Test a simple query
+      const result = await prisma.$queryRaw`SELECT 1 as test`;
+      console.log('✅ Database query test successful:', result);
     } catch (error) {
       console.error('❌ Database connection failed:', error.message);
+      console.error('❌ Full error:', error);
     }
 })
